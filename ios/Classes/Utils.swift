@@ -3,7 +3,7 @@ import WeScan
 
 class Utils {
     
-    static var channelName:String = "edge_detection"
+    static var channelName:String = "almato_scanner"
     
     static func getScannedFile(results: ImageScannerResults) -> String? {
         var path: String?

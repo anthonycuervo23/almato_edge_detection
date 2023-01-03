@@ -1,4 +1,4 @@
-group 'com.sample.edgedetection'
+group 'com.sample.almatoscanner'
 version '1.0-SNAPSHOT'
 
 buildscript {

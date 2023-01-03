@@ -1,4 +1,4 @@
-# edge_detection
+# almato_scanner
 
 A flutter plugin to detect edges of objects, scan paper, detect corners, detect rectangles. It allows cropping of the detected object image and returns the path of the cropped image.
 
@@ -44,16 +44,14 @@ Please check the latest version before installation.
 dependencies:
   flutter:
     sdk: flutter
-  edge_detection: ^1.1.1
+  almato_scanner: ^1.0.0
   permission_handler: ^10.0.0
-  path_provider: ^2.0.11
-  path: ^1.8.2
 ```
 
 ### Add the following imports to your Dart code:
 
 ```
-import 'package:edge_detection/edge_detection.dart';
+import 'package:almato_scanner/almato_scanner.dart';
 ```
 
 ```dart
@@ -68,16 +66,11 @@ if (!isCameraGranted) {
     return;
 }
 
-// Generate filepath for saving
-String imagePath = join((await getApplicationSupportDirectory()).path,
-    "${(DateTime.now().millisecondsSinceEpoch / 1000).round()}.jpeg");
-
-// Use below code for live camera detection with option to select from gallery in the camera feed.
-        
+// Use below code for live camera detection.
+       
 try {
     //Make sure to await the call to detectEdge.
-    bool success = await EdgeDetection.detectEdge(imagePath,
-        canUseGallery: true,
+    String? imagePath = await AlmatoScanner.detectEdge(
         androidScanTitle: 'Scanning', // use custom localizations for android
         androidCropTitle: 'Crop',
         androidCropBlackWhiteTitle: 'Black White',
@@ -91,7 +84,7 @@ try {
 
 try {
     //Make sure to await the call to detectEdgeFromGallery.
-    bool success = await EdgeDetection.detectEdgeFromGallery(imagePath,
+    String? imagePath = await AlmatoScanner.detectEdgeFromGallery(
         androidCropTitle: 'Crop', // use custom localizations for android
         androidCropBlackWhiteTitle: 'Black White',
         androidCropReset: 'Reset',
@@ -105,7 +98,7 @@ try {
 ## Demo
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/edge_detection/master/screenshots/demo.gif" alt="Demo" style="margin:auto" width="372" height="686">
+  <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/almato_scanner/master/screenshots/demo.gif" alt="Demo" style="margin:auto" width="372" height="686">
 </p>
 
 ## Screenshots
@@ -116,13 +109,13 @@ try {
    <table>
       <tr>
          <td style="text-align: center">
-            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/edge_detection/master/screenshots/android/1.png" width="200"/>
+            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/almato_scanner/master/screenshots/android/1.png" width="200"/>
          </td>
          <td style="text-align: center">
-            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/edge_detection/master/screenshots/android/2.png" width="200" />
+            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/almato_scanner/master/screenshots/android/2.png" width="200" />
          </td>
          <td style="text-align: center">
-            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/edge_detection/master/screenshots/android/3.png" width="200"/>
+            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/almato_scanner/master/screenshots/android/3.png" width="200"/>
          </td>
       </tr>
    </table>
@@ -134,13 +127,13 @@ try {
    <table>
       <tr>
          <td style="text-align: center">
-            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/edge_detection/master/screenshots/ios/1.PNG" width="200"/>
+            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/almato_scanner/master/screenshots/ios/1.PNG" width="200"/>
          </td>
          <td style="text-align: center">
-            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/edge_detection/master/screenshots/ios/2.PNG" width="200" />
+            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/almato_scanner/master/screenshots/ios/2.PNG" width="200" />
          </td>
          <td style="text-align: center">
-            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/edge_detection/master/screenshots/ios/3.PNG" width="200"/>
+            <img src="https://raw.githubusercontent.com/sawankumarbundelkhandi/almato_scanner/master/screenshots/ios/3.PNG" width="200"/>
          </td>
       </tr>
    </table>
