@@ -3,7 +3,7 @@ import WeScan
 
 class Utils {
     
-    static var channelName:String = "document_scanner_flutter"
+    static var channelName:String = "edge_detection"
     
     static func getScannedFile(results: ImageScannerResults) -> String? {
         var path: String?

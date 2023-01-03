@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:edge_detection/edge_detection.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 void main() {
@@ -24,6 +22,10 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> getImage() async {
+    /// if you want to pick from gallery, request permission for gallery.
+    /// is only necessary to request permissions for iOS
+    /// android will request permissions from native code
+
     bool isCameraGranted = await Permission.camera.request().isGranted;
     if (!isCameraGranted) {
       isCameraGranted =
@@ -38,19 +40,27 @@ class _MyAppState extends State<MyApp> {
 // Generate filepath for saving
     try {
       //Make sure to await the call to detectEdge.
-      // _imagePath = await EdgeDetection.detectEdge(
-      //   androidScanTitle: 'Scanning', // use custom localizations for android
+      _imagePath = await EdgeDetection.detectEdge(
+        androidScanTitle: 'Scanning', // use custom localizations for android
+        androidCropTitle: 'Crop',
+        androidCropBlackWhiteTitle: 'Black White',
+        androidCropReset: 'Reset',
+      );
+
+      // _imagePath = await EdgeDetection.detectEdgeFromGallery(
+      //   // androidScanTitle: 'Scanning', // use custom localizations for android
       //   androidCropTitle: 'Crop',
       //   androidCropBlackWhiteTitle: 'Black White',
       //   androidCropReset: 'Reset',
       // );
 
-      _imagePath = await EdgeDetection.detectEdgeFromGallery(
-        // androidScanTitle: 'Scanning', // use custom localizations for android
-        androidCropTitle: 'Crop',
-        androidCropBlackWhiteTitle: 'Black White',
-        androidCropReset: 'Reset',
-      );
+      if (_imagePath == null) {
+        return;
+      } else {
+        if (Platform.isIOS) {
+          _imagePath = _imagePath!.split('file://')[1];
+        }
+      }
     } catch (e) {
       print(e);
     }
@@ -60,6 +70,7 @@ class _MyAppState extends State<MyApp> {
     // setState to update our non-existent appearance.
     if (!mounted) return;
 
+    setState(() {});
   }
 
   @override
