@@ -50,6 +50,8 @@ class AlmatoScannerHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
         public const val CROP_TITLE = "crop_title"
         public const val CROP_BLACK_WHITE_TITLE = "crop_black_white_title"
         public const val CROP_RESET_TITLE = "crop_reset_title"
+        public const val CROP_MAGIC_TITLE = "crop_magic_title"
+        public const val CROP_HPF_TITLE = "crop_hpf_title"
     }
 
     fun setActivityPluginBinding(activityPluginBinding: ActivityPluginBinding) {
@@ -117,6 +119,14 @@ class AlmatoScannerHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
             CROP_BLACK_WHITE_TITLE,
             call.argument<String>(CROP_BLACK_WHITE_TITLE) as String
         )
+        bundle.putString(
+            CROP_MAGIC_TITLE,
+            call.argument<String>(CROP_MAGIC_TITLE) as String
+        )
+        bundle.putString(
+            CROP_HPF_TITLE,
+            call.argument<String>(CROP_HPF_TITLE) as String
+        )
         bundle.putString(CROP_RESET_TITLE, call.argument<String>(CROP_RESET_TITLE) as String)
 //        bundle.putBoolean(CAN_USE_GALLERY, call.argument<Boolean>(CAN_USE_GALLERY) as Boolean)
         initialIntent.putExtra(INITIAL_BUNDLE, bundle)
@@ -136,6 +146,14 @@ class AlmatoScannerHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
         bundle.putString(
             CROP_BLACK_WHITE_TITLE,
             call.argument<String>(CROP_BLACK_WHITE_TITLE) as String
+        )
+        bundle.putString(
+            CROP_MAGIC_TITLE,
+            call.argument<String>(CROP_MAGIC_TITLE) as String
+        )
+        bundle.putString(
+            CROP_HPF_TITLE,
+            call.argument<String>(CROP_HPF_TITLE) as String
         )
         bundle.putString(CROP_RESET_TITLE, call.argument<String>(CROP_RESET_TITLE) as String)
         bundle.putBoolean(FROM_GALLERY, true)

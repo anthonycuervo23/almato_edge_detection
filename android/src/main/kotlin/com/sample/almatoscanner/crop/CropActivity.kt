@@ -13,6 +13,7 @@ import android.widget.ImageView
 import com.sample.almatoscanner.AlmatoScannerHandler
 import com.sample.almatoscanner.R
 import com.sample.almatoscanner.base.BaseActivity
+import com.sample.almatoscanner.processor.Scan
 import com.sample.almatoscanner.view.PaperRectangle
 import kotlinx.android.synthetic.main.activity_crop.*
 
@@ -60,12 +61,17 @@ class CropActivity : BaseActivity(), ICropView.Proxy {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.crop_activity_menu, menu)
 
-        menu.setGroupVisible(R.id.enhance_group, showMenuItems)
+//        menu.setGroupVisible(R.id.enhance_group, showMenuItems)
+        menu.setGroupVisible(R.id.enhance_group, false)
 
         menu.findItem(R.id.rotation_image).isVisible = showMenuItems
 
-        menu.findItem(R.id.gray).title =
+        menu.findItem(R.id.grey).title =
             initialBundle.getString(AlmatoScannerHandler.CROP_BLACK_WHITE_TITLE) as String
+        menu.findItem(R.id.magic).title =
+            initialBundle.getString(AlmatoScannerHandler.CROP_MAGIC_TITLE) as String
+        menu.findItem(R.id.hpf).title =
+            initialBundle.getString(AlmatoScannerHandler.CROP_HPF_TITLE) as String
         menu.findItem(R.id.reset).title =
             initialBundle.getString(AlmatoScannerHandler.CROP_RESET_TITLE) as String
 
@@ -109,9 +115,20 @@ class CropActivity : BaseActivity(), ICropView.Proxy {
             Log.e(TAG, "Rotate touched!")
             mPresenter.rotate()
             return true
-        } else if (item.itemId == R.id.gray) {
-            Log.e(TAG, "Black White touched!")
-            mPresenter.enhance()
+        } else if (item.itemId == R.id.grey) {
+            mPresenter.reset()
+            Log.e(TAG, "Black White filter touched!")
+            mPresenter.enhance(Scan.ScanMode.SMODE)
+            return true
+        }else if (item.itemId == R.id.magic) {
+            mPresenter.reset()
+            Log.e(TAG, "Magic filter touched!")
+            mPresenter.enhance(Scan.ScanMode.RMODE)
+            return true
+        }else if (item.itemId == R.id.hpf) {
+            Log.e(TAG, "HPF touched!")
+            mPresenter.reset()
+            mPresenter.enhance(Scan.ScanMode.GCMODE)
             return true
         } else if (item.itemId == R.id.reset) {
             Log.e(TAG, "Reset touched!")

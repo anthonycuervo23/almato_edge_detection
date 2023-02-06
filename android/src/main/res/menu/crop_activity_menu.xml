@@ -25,9 +25,17 @@
         android:id="@+id/enhance_group"
         android:checkableBehavior="single">
         <item
-            android:id="@+id/gray"
+            android:id="@+id/grey"
             android:icon="@drawable/ic_done"
             android:title="@string/black" />
+        <item
+            android:id="@+id/magic"
+            android:icon="@drawable/ic_done"
+            android:title="@string/magic" />
+        <item
+            android:id="@+id/hpf"
+            android:icon="@drawable/ic_done"
+            android:title="@string/hpf" />
         <item
             android:id="@+id/reset"
             android:icon="@drawable/ic_reset_colors"

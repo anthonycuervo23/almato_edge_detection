@@ -56,12 +56,13 @@ fun cropPicture(picture: Mat, pts: List<Point>): Mat {
     return croppedPic
 }
 
-fun enhancePicture(src: Bitmap?): Bitmap {
+fun enhancePicture(src: Bitmap?, mode: Scan.ScanMode): Bitmap {
     val srcMat = Mat()
     Utils.bitmapToMat(src, srcMat)
     // create an object of Scan class
+    //TODO: find the correct values for kernel, blackPoint and whitePoint
     val scanner = Scan(srcMat, 51, 66.0, 160.0)
-    val scannedImg = scanner.scanImage(Scan.ScanMode.RMODE)
+    val scannedImg = scanner.scanImage(mode)
 //    Imgproc.cvtColor(srcMat, srcMat, Imgproc.COLOR_RGBA2GRAY)
 //    Imgproc.adaptiveThreshold(
 //        srcMat,
@@ -74,7 +75,7 @@ fun enhancePicture(src: Bitmap?): Bitmap {
 //    )
     val result = Bitmap.createBitmap(src?.width ?: 1080, src?.height ?: 1920, Bitmap.Config.RGB_565)
     Utils.matToBitmap(scannedImg, result, true)
-    scannedImg.release()
+    srcMat.release()
     return result
 }
 

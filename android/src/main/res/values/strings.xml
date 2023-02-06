@@ -14,4 +14,7 @@
 
     <string name="next">Next</string>
     <string name="done">Done</string>
+
+    <string name="magic">HPF</string>
+    <string name="hpf">HPF</string>
 </resources>

@@ -10,11 +10,15 @@ class AlmatoScanner {
       {String androidScanTitle: "Scanning",
       String androidCropTitle: "Crop",
       String androidCropBlackWhiteTitle: "Black White",
+      String androidCropMagicTitle: "Magic",
+      String androidCropHpfTitle: "HPF",
       String androidCropReset: "Reset"}) async {
     return await _channel.invokeMethod('edge_detect', {
       'scan_title': androidScanTitle,
       'crop_title': androidCropTitle,
       'crop_black_white_title': androidCropBlackWhiteTitle,
+      'crop_magic_title': androidCropMagicTitle,
+      'crop_hpf_title': androidCropHpfTitle,
       'crop_reset_title': androidCropReset,
     });
   }
@@ -23,10 +27,14 @@ class AlmatoScanner {
   static Future<String?> detectEdgeFromGallery(
       {String androidCropTitle: "Crop",
       String androidCropBlackWhiteTitle: "Black White",
+      String androidCropMagicTitle: "Magic",
+      String androidCropHpfTitle: "HPF",
       String androidCropReset: "Reset"}) async {
     return await _channel.invokeMethod('edge_detect_gallery', {
       'crop_title': androidCropTitle,
       'crop_black_white_title': androidCropBlackWhiteTitle,
+      'crop_magic_title': androidCropMagicTitle,
+      'crop_hpf_title': androidCropHpfTitle,
       'crop_reset_title': androidCropReset,
     });
   }

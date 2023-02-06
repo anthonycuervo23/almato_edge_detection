@@ -18,10 +18,7 @@ import android.util.Log
 import android.view.View
 import com.sample.almatoscanner.AlmatoScannerHandler
 import com.sample.almatoscanner.SourceManager
-import com.sample.almatoscanner.processor.Corners
-import com.sample.almatoscanner.processor.TAG
-import com.sample.almatoscanner.processor.cropPicture
-import com.sample.almatoscanner.processor.enhancePicture
+import com.sample.almatoscanner.processor.*
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -124,12 +121,18 @@ class CropPresenter(
                 iCropView.getCroppedPaper().setImageBitmap(croppedBitmap)
                 iCropView.getPaper().visibility = View.GONE
                 iCropView.getPaperRect().visibility = View.GONE
+
+                Log.i(TAG, "FILTER CALLED FROM FUNC")
+
+                enhance(Scan.ScanMode.SMODE)
             }
+
     }
 
-    fun enhance() {
+    fun enhance(mode: Scan.ScanMode) {
+        Log.i(TAG, "FILTER CALLED")
         if (croppedBitmap == null) {
-            Log.i(TAG, "picture null?")
+            Log.i(TAG, "picture null??")
             return
         }
 
@@ -146,7 +149,7 @@ class CropPresenter(
         }
 
         Observable.create<Bitmap> {
-            it.onNext(enhancePicture(imgToEnhance))
+            it.onNext(enhancePicture(imgToEnhance, mode))
         }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
