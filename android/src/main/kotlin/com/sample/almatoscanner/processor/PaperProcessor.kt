@@ -9,6 +9,7 @@ import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+
 const val TAG: String = "PaperProcessor"
 
 fun processPicture(previewFrame: Mat): Corners? {
@@ -58,19 +59,22 @@ fun cropPicture(picture: Mat, pts: List<Point>): Mat {
 fun enhancePicture(src: Bitmap?): Bitmap {
     val srcMat = Mat()
     Utils.bitmapToMat(src, srcMat)
-    Imgproc.cvtColor(srcMat, srcMat, Imgproc.COLOR_RGBA2GRAY)
-    Imgproc.adaptiveThreshold(
-        srcMat,
-        srcMat,
-        255.0,
-        Imgproc.ADAPTIVE_THRESH_MEAN_C,
-        Imgproc.THRESH_BINARY,
-        15,
-        15.0
-    )
+    // create an object of Scan class
+    val scanner = Scan(srcMat, 51, 66.0, 160.0)
+    val scannedImg = scanner.scanImage(Scan.ScanMode.RMODE)
+//    Imgproc.cvtColor(srcMat, srcMat, Imgproc.COLOR_RGBA2GRAY)
+//    Imgproc.adaptiveThreshold(
+//        srcMat,
+//        srcMat,
+//        255.0,
+//        Imgproc.ADAPTIVE_THRESH_MEAN_C,
+//        Imgproc.THRESH_BINARY,
+//        15,
+//        15.0
+//    )
     val result = Bitmap.createBitmap(src?.width ?: 1080, src?.height ?: 1920, Bitmap.Config.RGB_565)
-    Utils.matToBitmap(srcMat, result, true)
-    srcMat.release()
+    Utils.matToBitmap(scannedImg, result, true)
+    scannedImg.release()
     return result
 }
 
