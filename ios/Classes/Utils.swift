@@ -1,5 +1,5 @@
 import Foundation
-import WeScan
+// import WeScan
 
 class Utils {
     

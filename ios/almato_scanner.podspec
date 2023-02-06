@@ -16,7 +16,7 @@ Plugin to detect edges of objects
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'WeScan'
+  # s.dependency 'WeScan'
   s.platform = :ios, '10.0'
 
   # Flutter.framework does not contain a i386 slice.
