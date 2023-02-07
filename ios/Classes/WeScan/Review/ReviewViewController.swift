@@ -13,8 +13,8 @@ import UIKit
 final class ReviewViewController: UIViewController {
 
     private var rotationAngle = Measurement<UnitAngle>(value: 0, unit: .degrees)
-    private var enhancedImageIsAvailable = false
-    private var isCurrentlyDisplayingEnhancedImage = false
+    private var enhancedImageIsAvailable = true // originally false
+    private var isCurrentlyDisplayingEnhancedImage = true // originally false
 
     lazy var imageView: UIImageView = {
         let imageView = UIImageView()
@@ -34,7 +34,17 @@ final class ReviewViewController: UIViewController {
             in: Bundle(for: ScannerViewController.self),
             compatibleWith: nil
         )
+        
         let button = UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(toggleEnhancedImage))
+        
+        // originally is visible
+        if #available(iOS 16.0, *) {
+            button.isHidden = true
+        } else {
+            button.isEnabled = false
+            button.image = nil
+        }
+
         button.tintColor = .white
         return button
     }()
@@ -75,6 +85,8 @@ final class ReviewViewController: UIViewController {
         setupViews()
         setupToolbar()
         setupConstraints()
+        //set enhance image by default
+        imageView.image = results.enhancedScan?.image.rotated(by: rotationAngle) ?? results.enhancedScan?.image
         title = "Vorschau"
 //        title = NSLocalizedString("wescan.review.title",
 //                                  tableName: nil,
@@ -140,10 +152,13 @@ final class ReviewViewController: UIViewController {
 
     // MARK: - Actions
 
-    @objc private func reloadImage() {
+    @objc
+    private func reloadImage() {
         if enhancedImageIsAvailable, isCurrentlyDisplayingEnhancedImage {
+            //if image is already enhanced we will use this to rotate img
             imageView.image = results.enhancedScan?.image.rotated(by: rotationAngle) ?? results.enhancedScan?.image
         } else {
+            //if image is not enhanced we use this to rotate
             imageView.image = results.croppedScan.image.rotated(by: rotationAngle) ?? results.croppedScan.image
         }
     }
