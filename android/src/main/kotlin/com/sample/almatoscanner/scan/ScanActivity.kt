@@ -3,6 +3,7 @@ package com.sample.almatoscanner.scan
 import androidx.core.content.ContextCompat
 //
 import android.app.Activity
+import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.ExifInterface
@@ -273,7 +274,9 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         Log.i(TAG, "width:" + imageWidth)
         Log.i(TAG, "height:" + imageHeight)
 
-        val inputData: ByteArray? = getBytes(contentResolver.openInputStream(imageUri)!!)
+//        val inputData: ByteArray? = getBytes(contentResolver.openInputStream(imageUri)!!)
+        val inputData: ByteArray? = readBytesFromUri(contentResolver, imageUri)
+
         val mat = Mat(Size(imageWidth, imageHeight), CvType.CV_8U)
         mat.put(0, 0, inputData)
         val pic = Imgcodecs.imdecode(mat, Imgcodecs.CV_LOAD_IMAGE_UNCHANGED)
@@ -281,6 +284,14 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         mat.release()
 
         mPresenter.detectEdge(pic);
+    }
+
+    @Throws(IOException::class)
+    fun readBytesFromUri(contentResolver: ContentResolver, uri: Uri): ByteArray? {
+        val inputStream = contentResolver.openInputStream(uri)
+        return inputStream?.use {
+            it.readBytes()
+        }
     }
 
     @Throws(IOException::class)

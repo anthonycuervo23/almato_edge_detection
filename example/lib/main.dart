@@ -87,7 +87,7 @@ class _MyAppState extends State<MyApp> {
             children: [
               Center(
                 child: ElevatedButton(
-                  onPressed: getImageFromCamera,
+                  onPressed: () => getImageFromCamera(),
                   child: Text('Scan'),
                 ),
               ),
