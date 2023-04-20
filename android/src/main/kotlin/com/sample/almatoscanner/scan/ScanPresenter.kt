@@ -46,13 +46,13 @@ import android.util.Size as SizeB
 
 class ScanPresenter constructor(
     private val context: Context,
-    private val iView: IScanView.Proxy,
+    private val iView: IScanView.Proxy? = null,
     private val initialBundle: Bundle
 ) :
     SurfaceHolder.Callback, Camera.PictureCallback, Camera.PreviewCallback {
     private val TAG: String = "ScanPresenter"
     private var mCamera: Camera? = null
-    private val mSurfaceHolder: SurfaceHolder = iView.getSurfaceView().holder
+    private val mSurfaceHolder: SurfaceHolder? = iView?.getSurfaceView()?.holder
     private val executor: ExecutorService
     private val proxySchedule: Scheduler
     private var busy: Boolean = false
@@ -63,7 +63,7 @@ class ScanPresenter constructor(
     private var shutted: Boolean = true
 
     init {
-        mSurfaceHolder.addCallback(this)
+        mSurfaceHolder?.addCallback(this)
         executor = Executors.newSingleThreadExecutor()
         proxySchedule = Schedulers.from(executor)
     }
@@ -168,7 +168,7 @@ class ScanPresenter constructor(
 
         //val size = getMaxResolution()
 
-        val size = iView.getCurrentDisplay()?.let {
+        val size = iView?.getCurrentDisplay()?.let {
             getPreviewOutputSize(
                 it, cameraCharacteristics, SurfaceHolder::class.java
             )
@@ -180,7 +180,7 @@ class ScanPresenter constructor(
 
         size?.width?.toString()?.let { Log.i(TAG, it) }
         param?.setPreviewSize(size?.width ?: 1920, size?.height ?: 1080)
-        val display = iView.getCurrentDisplay()
+        val display = iView?.getCurrentDisplay()
         val point = Point()
 
         display?.getRealSize(point)
@@ -190,9 +190,9 @@ class ScanPresenter constructor(
         val displayRatio = displayWidth.div(displayHeight.toFloat())
         val previewRatio = size?.height?.toFloat()?.div(size.width.toFloat()) ?: displayRatio
         if (displayRatio > previewRatio) {
-            val surfaceParams = iView.getSurfaceView().layoutParams
-            surfaceParams.height = (displayHeight / displayRatio * previewRatio).toInt()
-            iView.getSurfaceView().layoutParams = surfaceParams
+            val surfaceParams = iView?.getSurfaceView()?.layoutParams
+            surfaceParams?.height = (displayHeight / displayRatio * previewRatio).toInt()
+            iView?.getSurfaceView()?.layoutParams = surfaceParams
         }
 
         val supportPicSize = mCamera?.parameters?.supportedPictureSizes
@@ -321,10 +321,10 @@ class ScanPresenter constructor(
                         }
                     }.observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
-                            iView.getPaperRect().onCornersDetected(it)
+                            iView?.getPaperRect()?.onCornersDetected(it)
 
                         }, {
-                            iView.getPaperRect().onCornersNotDetected()
+                            iView?.getPaperRect()?.onCornersNotDetected()
                         })
                 }, { throwable -> Log.e(TAG, throwable.message!!) })
         } catch (e: Exception) {

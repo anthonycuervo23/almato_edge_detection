@@ -3,6 +3,7 @@ package com.sample.almatoscanner
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import com.sample.almatoscanner.gallery.GalleryPickerActivity
 import com.sample.almatoscanner.scan.ScanActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
@@ -139,9 +140,8 @@ class AlmatoScannerHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
             return
         }
         val initialIntent =
-            Intent(Intent(getActivity()?.applicationContext, ScanActivity::class.java))
+            Intent(Intent(getActivity()?.applicationContext, GalleryPickerActivity::class.java))
         val bundle = Bundle();
-//        bundle.putString(SAVE_TO, call.argument<String>(SAVE_TO) as String)
         bundle.putString(CROP_TITLE, call.argument<String>(CROP_TITLE) as String)
         bundle.putString(
             CROP_BLACK_WHITE_TITLE,

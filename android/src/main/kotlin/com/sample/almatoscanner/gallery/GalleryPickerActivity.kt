@@ -1,7 +1,5 @@
-package com.sample.almatoscanner.scan
+package com.sample.almatoscanner.gallery
 
-import androidx.core.content.ContextCompat
-//
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Intent
@@ -10,38 +8,43 @@ import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-
+import android.provider.MediaStore
 import android.util.Log
-import android.view.*
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.sample.almatoscanner.AlmatoScannerHandler
-import com.sample.almatoscanner.R
 import com.sample.almatoscanner.REQUEST_CODE
 import com.sample.almatoscanner.SCANNED_RESULT
+import com.sample.almatoscanner.SourceManager
 import com.sample.almatoscanner.base.BaseActivity
-import com.sample.almatoscanner.view.PaperRectangle
-import kotlinx.android.synthetic.main.activity_scan.*
+import com.sample.almatoscanner.crop.CropActivity
+import com.sample.almatoscanner.processor.processPicture
+import com.sample.almatoscanner.scan.ScanPresenter
 import org.opencv.android.OpenCVLoader
 import org.opencv.core.Core
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.Size
 import org.opencv.imgcodecs.Imgcodecs
-import java.io.*
+import org.opencv.imgproc.Imgproc
+import java.io.IOException
+import java.io.InputStream
 
-class ScanActivity : BaseActivity(), IScanView.Proxy {
-
-    private val REQUEST_CAMERA_PERMISSION = 0
-    private val REQUEST_GALLERY_CODE = 2;
+class GalleryPickerActivity : BaseActivity() {
 
     private lateinit var mPresenter: ScanPresenter;
+    private val REQUEST_STORAGE_PERMISSION = 0
+    private lateinit var initialBundle: Bundle
+    private val REQUEST_GALLERY_CODE = 1;
 
-    override fun provideContentViewId(): Int = R.layout.activity_scan
+    override fun provideContentViewId(): Int = 123;
 
     override fun initPresenter() {
-        val initialBundle = intent.getBundleExtra(AlmatoScannerHandler.INITIAL_BUNDLE) as Bundle;
-        mPresenter = ScanPresenter(this, this, initialBundle)
+        supportActionBar?.hide();
+        initialBundle = intent.getBundleExtra(AlmatoScannerHandler.INITIAL_BUNDLE) as Bundle;
+        mPresenter = ScanPresenter(this, null, initialBundle)
     }
 
     override fun prepare() {
@@ -51,30 +54,15 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         }
         if (ContextCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                this,
                 android.Manifest.permission.WRITE_EXTERNAL_STORAGE
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(
-                    android.Manifest.permission.CAMERA,
                     android.Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ),
-                REQUEST_CAMERA_PERMISSION
-            )
-        } else if (ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(android.Manifest.permission.CAMERA),
-                REQUEST_CAMERA_PERMISSION
+                REQUEST_STORAGE_PERMISSION
             )
         } else if (ContextCompat.checkSelfPermission(
                 this,
@@ -84,69 +72,20 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                REQUEST_CAMERA_PERMISSION
+                REQUEST_STORAGE_PERMISSION
             )
+        }else{
+            pickupFromGallery();
         }
 
-        shut.setOnClickListener {
-            if (mPresenter.canShut) {
-                mPresenter.shut()
-            }
-        }
 
-        flash.visibility =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                // to hidde the flashLight button from  SDK versions which we do not handle the permission for!
-                Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q &&
-                //
-                baseContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
-            ) View.VISIBLE else View.GONE;
-        flash.setOnClickListener {
-            mPresenter.toggleFlash();
-        }
+
 
         val initialBundle = intent.getBundleExtra(AlmatoScannerHandler.INITIAL_BUNDLE) as Bundle;
 
         this.title = initialBundle.getString(AlmatoScannerHandler.SCAN_TITLE) as? String
 
-        gallery.setOnClickListener {
-            pickupFromGallery()
-        };
 
-            if (initialBundle.containsKey(AlmatoScannerHandler.FROM_GALLERY) && initialBundle.getBoolean(
-                    AlmatoScannerHandler.FROM_GALLERY,
-                    false
-                )
-            ) {
-
-                pickupFromGallery()
-            }
-
-    }
-
-    fun pickupFromGallery() {
-        mPresenter.stop()
-        val gallery = Intent(
-            Intent.ACTION_PICK,
-            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply{
-            type="image/*"
-        }
-        ActivityCompat.startActivityForResult(this, gallery, REQUEST_GALLERY_CODE, null);
-    }
-
-
-    override fun onStart() {
-        super.onStart()
-        mPresenter.start()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        mPresenter.stop()
-    }
-
-    override fun exit() {
-        finish()
     }
 
     override fun onRequestPermissionsResult(
@@ -158,7 +97,7 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         var allGranted = false
         var indexPermission = -1
 
-        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+        if (requestCode == REQUEST_STORAGE_PERMISSION) {
             if (grantResults.count() == 1) {
                 if (permissions.indexOf(android.Manifest.permission.CAMERA) >= 0) {
                     indexPermission = permissions.indexOf(android.Manifest.permission.CAMERA)
@@ -169,42 +108,33 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
                 }
                 if (indexPermission >= 0 && grantResults[indexPermission] == PackageManager.PERMISSION_GRANTED) {
                     allGranted = true
-                }
-            }
 
-            if (grantResults.count() == 2 && (
-                        grantResults[permissions.indexOf(android.Manifest.permission.CAMERA)] == PackageManager.PERMISSION_GRANTED
-                                && grantResults[permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)] == PackageManager.PERMISSION_GRANTED)
-            ) {
-                allGranted = true
+                }
             }
         }
 
         if (allGranted) {
-            showMessage(R.string.camera_grant)
-            mPresenter.initCamera()
-            mPresenter.updateCamera()
+            pickupFromGallery();
+        }else{
+            Toast.makeText(this, "Permissions are required to access the gallery", Toast.LENGTH_LONG).show();
+            finish();
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
     }
 
-    override fun getCurrentDisplay(): Display? {
-        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            this.display
-        } else {
-            this.windowManager.defaultDisplay
+    fun pickupFromGallery() {
+        val gallery = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply{
+            type="image/*"
         }
+        ActivityCompat.startActivityForResult(this, gallery, 1, null);
     }
-
-    override fun getSurfaceView(): SurfaceView = surface
-
-    override fun getPaperRect(): PaperRectangle = paper_rect
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 if(data != null && data.extras != null){
@@ -213,40 +143,23 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
                     finish()
                 }
             } else {
-                if (intent.hasExtra(AlmatoScannerHandler.FROM_GALLERY) && intent.getBooleanExtra(
-                        AlmatoScannerHandler.FROM_GALLERY, false
-                    )
-                )
-                    finish()
+                 finish()
             }
         }
-
-        if (requestCode == REQUEST_GALLERY_CODE) {
+        if (requestCode == 1) {
+            Log.i(TAG, "request code $requestCode")
             if (resultCode == Activity.RESULT_OK) {
+                Log.i(TAG, "request code OK")
                 val uri: Uri = data!!.data!!
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     onImageSelected(uri)
                 }
             } else {
-                if (intent.hasExtra(AlmatoScannerHandler.FROM_GALLERY) && intent.getBooleanExtra(
-                        AlmatoScannerHandler.FROM_GALLERY,
-                        false
-                    )
-                )
-                    finish()
+                finish()
             }
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
-        if (item.itemId == android.R.id.home) {
-            onBackPressed()
-            return true
-        }
-
-        return super.onOptionsItemSelected(item)
-    }
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun onImageSelected(imageUri: Uri) {
@@ -273,6 +186,7 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         }
         Log.i(TAG, "width:" + imageWidth)
         Log.i(TAG, "height:" + imageHeight)
+
         val inputData: ByteArray? = readBytesFromUri(contentResolver, imageUri)
 
         val mat = Mat(Size(imageWidth, imageHeight), CvType.CV_8U)
@@ -280,8 +194,15 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         val pic = Imgcodecs.imdecode(mat, Imgcodecs.CV_LOAD_IMAGE_UNCHANGED)
         if (rotation > -1) Core.rotate(pic, pic, rotation)
         mat.release()
+        SourceManager.corners = processPicture(pic)
+        Imgproc.cvtColor(pic, pic, Imgproc.COLOR_RGB2BGRA)
+        SourceManager.pic = pic
 
-        mPresenter.detectEdge(pic);
+        val cropIntent = Intent(this, CropActivity::class.java);
+        cropIntent.putExtra(AlmatoScannerHandler.INITIAL_BUNDLE, this.initialBundle)
+        ActivityCompat.startActivityForResult(this, cropIntent, REQUEST_CODE, null);
+//        mPresenter.detectEdge(pic);
+//        finish();
     }
 
     @Throws(IOException::class)
@@ -291,5 +212,4 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
             it.readBytes()
         }
     }
-
 }

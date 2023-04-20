@@ -14,7 +14,9 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(provideContentViewId())
+        if(provideContentViewId() != 123){
+            setContentView(provideContentViewId());
+        }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         initPresenter()
         transparentStatusBar()

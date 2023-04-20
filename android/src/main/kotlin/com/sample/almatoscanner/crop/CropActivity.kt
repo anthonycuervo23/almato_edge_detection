@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.ImageView
 import com.sample.almatoscanner.AlmatoScannerHandler
 import com.sample.almatoscanner.R
+import com.sample.almatoscanner.REQUEST_CODE
 import com.sample.almatoscanner.base.BaseActivity
 import com.sample.almatoscanner.processor.Scan
 import com.sample.almatoscanner.view.PaperRectangle
@@ -85,7 +86,6 @@ class CropActivity : BaseActivity(), ICropView.Proxy {
 
         return super.onCreateOptionsMenu(menu)
     }
-
 
     private fun changeMenuVisibility(showMenuItems: Boolean) {
         this.showMenuItems = showMenuItems
