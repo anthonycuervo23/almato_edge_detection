@@ -16,7 +16,7 @@ import com.sample.almatoscanner.REQUEST_CODE
 import com.sample.almatoscanner.base.BaseActivity
 import com.sample.almatoscanner.processor.Scan
 import com.sample.almatoscanner.view.PaperRectangle
-import kotlinx.android.synthetic.main.activity_crop.*
+import com.sample.almatoscanner.databinding.ActivityCropBinding
 
 
 class CropActivity : BaseActivity(), ICropView.Proxy {
@@ -27,6 +27,8 @@ class CropActivity : BaseActivity(), ICropView.Proxy {
 
     private lateinit var initialBundle: Bundle;
 
+    private lateinit var binding: ActivityCropBinding
+
     override fun prepare() {
         this.initialBundle = intent.getBundleExtra(AlmatoScannerHandler.INITIAL_BUNDLE) as Bundle;
         this.title = initialBundle.getString(AlmatoScannerHandler.CROP_TITLE)
@@ -34,9 +36,9 @@ class CropActivity : BaseActivity(), ICropView.Proxy {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        paper.post {
-            //we have to initialize everything in post when the view has been drawn and we have the actual height and width of the whole view
-            mPresenter.onViewsReady(paper.width, paper.height)
+        //we have to initialize everything in post when the view has been drawn and we have the actual height and width of the whole view
+        binding.paper.post {  // Usa `binding` para acceder a las vistas
+            mPresenter.onViewsReady(binding.paper.width, binding.paper.height)
         }
     }
 
@@ -44,20 +46,21 @@ class CropActivity : BaseActivity(), ICropView.Proxy {
 
 
     override fun initPresenter() {
+        binding = ActivityCropBinding.inflate(layoutInflater)  // Infla la clase de binding aquí
+        setContentView(binding.root)  // Usa binding.root en lugar de la constante de layout
         val initialBundle = intent.getBundleExtra(AlmatoScannerHandler.INITIAL_BUNDLE) as Bundle;
         mPresenter = CropPresenter(this, this, initialBundle)
-        findViewById<ImageView>(R.id.crop).setOnClickListener {
-            Log.e(TAG, "Crop touched!")
+        binding.crop.setOnClickListener {
             mPresenter.crop()
             changeMenuVisibility(true)
         }
     }
 
-    override fun getPaper(): ImageView = paper
+    override fun getPaper(): ImageView = binding.paper  // Usa `binding` para acceder a las vistas
 
-    override fun getPaperRect(): PaperRectangle = paper_rect
+    override fun getPaperRect(): PaperRectangle = binding.paperRect  // Usa `binding` para acceder a las vistas
 
-    override fun getCroppedPaper(): ImageView = picture_cropped
+    override fun getCroppedPaper(): ImageView = binding.pictureCropped  // Usa `binding` para acceder a las vistas
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.crop_activity_menu, menu)
@@ -100,42 +103,49 @@ class CropActivity : BaseActivity(), ICropView.Proxy {
             return true
         }
 
-        if (item.itemId == R.id.action_label) {
-            Log.e(TAG, "Saved touched!")
-            // Bug fix: prevent clicking more than one time
-            item.setEnabled(false)
-            val path = mPresenter.save()
-            Log.e(TAG, "Saved touched! $path")
-            setResult(Activity.RESULT_OK, Intent().putExtra(SCANNED_RESULT, path))
-            //
-            System.gc()
-            finish()
-            return true
-        } else if (item.itemId == R.id.rotation_image) {
-            Log.e(TAG, "Rotate touched!")
-            mPresenter.rotate()
-            return true
-        } else if (item.itemId == R.id.grey) {
-            mPresenter.reset()
-            Log.e(TAG, "Black White filter touched!")
-            mPresenter.enhance(Scan.ScanMode.SMODE)
-            return true
-        }else if (item.itemId == R.id.magic) {
-            mPresenter.reset()
-            Log.e(TAG, "Magic filter touched!")
-            mPresenter.enhance(Scan.ScanMode.RMODE)
-            return true
-        }else if (item.itemId == R.id.hpf) {
-            Log.e(TAG, "HPF touched!")
-            mPresenter.reset()
-            mPresenter.enhance(Scan.ScanMode.GCMODE)
-            return true
-        } else if (item.itemId == R.id.reset) {
-            Log.e(TAG, "Reset touched!")
-            mPresenter.reset()
-            return true
+        when (item.itemId) {
+            R.id.action_label -> {
+                Log.e(TAG, "Saved touched!")
+                // Bug fix: prevent clicking more than one time
+                item.setEnabled(false)
+                val path = mPresenter.save()
+                Log.e(TAG, "Saved touched! $path")
+                setResult(Activity.RESULT_OK, Intent().putExtra(SCANNED_RESULT, path))
+                //
+                System.gc()
+                finish()
+                return true
+            }
+            R.id.rotation_image -> {
+                Log.e(TAG, "Rotate touched!")
+                mPresenter.rotate()
+                return true
+            }
+            R.id.grey -> {
+                mPresenter.reset()
+                Log.e(TAG, "Black White filter touched!")
+                mPresenter.enhance(Scan.ScanMode.SMODE)
+                return true
+            }
+            R.id.magic -> {
+                mPresenter.reset()
+                Log.e(TAG, "Magic filter touched!")
+                mPresenter.enhance(Scan.ScanMode.RMODE)
+                return true
+            }
+            R.id.hpf -> {
+                Log.e(TAG, "HPF touched!")
+                mPresenter.reset()
+                mPresenter.enhance(Scan.ScanMode.GCMODE)
+                return true
+            }
+            R.id.reset -> {
+                Log.e(TAG, "Reset touched!")
+                mPresenter.reset()
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
         }
 
-        return super.onOptionsItemSelected(item)
     }
 }

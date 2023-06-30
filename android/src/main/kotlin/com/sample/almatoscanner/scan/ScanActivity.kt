@@ -21,7 +21,8 @@ import com.sample.almatoscanner.REQUEST_CODE
 import com.sample.almatoscanner.SCANNED_RESULT
 import com.sample.almatoscanner.base.BaseActivity
 import com.sample.almatoscanner.view.PaperRectangle
-import kotlinx.android.synthetic.main.activity_scan.*
+import com.sample.almatoscanner.databinding.ActivityScanBinding
+//import kotlinx.android.synthetic.main.activity_scan.*
 import org.opencv.android.OpenCVLoader
 import org.opencv.core.Core
 import org.opencv.core.CvType
@@ -37,14 +38,28 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
 
     private lateinit var mPresenter: ScanPresenter;
 
+    private lateinit var initialBundle: Bundle
+
+    private lateinit var binding: ActivityScanBinding
+
     override fun provideContentViewId(): Int = R.layout.activity_scan
 
     override fun initPresenter() {
-        val initialBundle = intent.getBundleExtra(AlmatoScannerHandler.INITIAL_BUNDLE) as Bundle;
+        binding = ActivityScanBinding.inflate(layoutInflater)
+
+        val view = binding.root
+        setContentView(view)
+
+        initialBundle = intent.getBundleExtra(AlmatoScannerHandler.INITIAL_BUNDLE) as Bundle
         mPresenter = ScanPresenter(this, this, initialBundle)
+        prepare()
     }
 
     override fun prepare() {
+        this.title = initialBundle.getString(AlmatoScannerHandler.SCAN_TITLE)
+
+
+
         if (!OpenCVLoader.initDebug()) {
             Log.i(TAG, "loading opencv error, exit")
             finish()
@@ -88,20 +103,21 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
             )
         }
 
-        shut.setOnClickListener {
+        // Utiliza las vistas con "binding" en lugar de las sintaxis kotlinx.android.synthetic
+        binding.shut.setOnClickListener {
             if (mPresenter.canShut) {
                 mPresenter.shut()
             }
         }
 
-        flash.visibility =
+        binding.flash.visibility =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 // to hidde the flashLight button from  SDK versions which we do not handle the permission for!
                 Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q &&
                 //
                 baseContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
             ) View.VISIBLE else View.GONE;
-        flash.setOnClickListener {
+        binding.flash.setOnClickListener {
             mPresenter.toggleFlash();
         }
 
@@ -109,7 +125,7 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
 
         this.title = initialBundle.getString(AlmatoScannerHandler.SCAN_TITLE) as? String
 
-        gallery.setOnClickListener {
+        binding.gallery.setOnClickListener {
             pickupFromGallery()
         };
 
@@ -198,9 +214,9 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         }
     }
 
-    override fun getSurfaceView(): SurfaceView = surface
+    override fun getSurfaceView(): SurfaceView = binding.surface
 
-    override fun getPaperRect(): PaperRectangle = paper_rect
+    override fun getPaperRect(): PaperRectangle = binding.paperRect
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

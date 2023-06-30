@@ -4,8 +4,7 @@ version: 1.0.0
 homepage: https://github.com/anthonycuervo23/almato_edge_detection
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
-  flutter: ">=1.20.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
