@@ -3,6 +3,7 @@ package com.sample.almatoscanner.base
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +16,7 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if(provideContentViewId() != 123){
-            setContentView(provideContentViewId());
+            setContentView(provideContentViewId())
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         initPresenter()
@@ -23,34 +24,26 @@ abstract class BaseActivity : AppCompatActivity() {
         prepare()
     }
 
-    fun transparentStatusBar(
+    private fun transparentStatusBar(
         statusBarColor: Int = resources.getColor(R.color.colorPrimary)
     ) {
-        var systemUiVisibility = 0
-        // Use a dark scrim by default since light status is API 23+
-        //  Use a dark scrim by default since light nav bar is API 27+
-        val winParams = window.attributes
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            systemUiVisibility = systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            systemUiVisibility = systemUiVisibility or
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            window.decorView.systemUiVisibility = systemUiVisibility
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            winParams.flags = winParams.flags or
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            winParams.flags = winParams.flags and
-                (WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS).inv()
-            window.statusBarColor = statusBarColor
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.let {
+                it.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                it.setSystemBarsAppearance(
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                )
+            }
+        } else {
+            var flags = window.decorView.systemUiVisibility   // get current flag
+            flags = flags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR   // add LIGHT_STATUS_BAR to flag
+            window.decorView.systemUiVisibility = flags
         }
 
-        window.attributes = winParams
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        window.statusBarColor = statusBarColor
     }
 
     fun showMessage(id: Int) {

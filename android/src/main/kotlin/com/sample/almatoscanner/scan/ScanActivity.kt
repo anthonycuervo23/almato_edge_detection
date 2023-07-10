@@ -34,9 +34,9 @@ import java.io.*
 class ScanActivity : BaseActivity(), IScanView.Proxy {
 
     private val REQUEST_CAMERA_PERMISSION = 0
-    private val REQUEST_GALLERY_CODE = 2;
+    private val REQUEST_GALLERY_CODE = 2
 
-    private lateinit var mPresenter: ScanPresenter;
+    private lateinit var mPresenter: ScanPresenter
 
     private lateinit var initialBundle: Bundle
 
@@ -67,38 +67,11 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         if (ContextCompat.checkSelfPermission(
                 this,
                 android.Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    android.Manifest.permission.CAMERA,
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ),
-                REQUEST_CAMERA_PERMISSION
-            )
-        } else if (ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.CAMERA
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(android.Manifest.permission.CAMERA),
-                REQUEST_CAMERA_PERMISSION
-            )
-        } else if (ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 REQUEST_CAMERA_PERMISSION
             )
         }
@@ -111,23 +84,19 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         }
 
         binding.flash.visibility =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                // to hidde the flashLight button from  SDK versions which we do not handle the permission for!
-                Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q &&
-                //
-                baseContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
-            ) View.VISIBLE else View.GONE;
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q && baseContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
+            ) View.VISIBLE else View.GONE
         binding.flash.setOnClickListener {
-            mPresenter.toggleFlash();
+            mPresenter.toggleFlash()
         }
 
-        val initialBundle = intent.getBundleExtra(AlmatoScannerHandler.INITIAL_BUNDLE) as Bundle;
+        val initialBundle = intent.getBundleExtra(AlmatoScannerHandler.INITIAL_BUNDLE) as Bundle
 
-        this.title = initialBundle.getString(AlmatoScannerHandler.SCAN_TITLE) as? String
+        this.title = initialBundle.getString(AlmatoScannerHandler.SCAN_TITLE)
 
         binding.gallery.setOnClickListener {
             pickupFromGallery()
-        };
+        }
 
             if (initialBundle.containsKey(AlmatoScannerHandler.FROM_GALLERY) && initialBundle.getBoolean(
                     AlmatoScannerHandler.FROM_GALLERY,
@@ -140,14 +109,14 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
 
     }
 
-    fun pickupFromGallery() {
+    private fun pickupFromGallery() {
         mPresenter.stop()
         val gallery = Intent(
             Intent.ACTION_PICK,
             android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply{
             type="image/*"
         }
-        ActivityCompat.startActivityForResult(this, gallery, REQUEST_GALLERY_CODE, null);
+        ActivityCompat.startActivityForResult(this, gallery, REQUEST_GALLERY_CODE, null)
     }
 
 
@@ -171,45 +140,22 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         grantResults: IntArray
     ) {
 
-        var allGranted = false
-        var indexPermission = -1
-
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (grantResults.count() == 1) {
-                if (permissions.indexOf(android.Manifest.permission.CAMERA) >= 0) {
-                    indexPermission = permissions.indexOf(android.Manifest.permission.CAMERA)
-                }
-                if (permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) >= 0) {
-                    indexPermission =
-                        permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                }
-                if (indexPermission >= 0 && grantResults[indexPermission] == PackageManager.PERMISSION_GRANTED) {
-                    allGranted = true
-                }
+            if (grantResults.count() == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                showMessage(R.string.camera_grant)
+                mPresenter.initCamera()
+                mPresenter.updateCamera()
             }
-
-            if (grantResults.count() == 2 && (
-                        grantResults[permissions.indexOf(android.Manifest.permission.CAMERA)] == PackageManager.PERMISSION_GRANTED
-                                && grantResults[permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)] == PackageManager.PERMISSION_GRANTED)
-            ) {
-                allGranted = true
-            }
-        }
-
-        if (allGranted) {
-            showMessage(R.string.camera_grant)
-            mPresenter.initCamera()
-            mPresenter.updateCamera()
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
     }
 
     override fun getCurrentDisplay(): Display? {
-        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             this.display
         } else {
+            @Suppress("DEPRECATION")
             this.windowManager.defaultDisplay
         }
     }
@@ -240,9 +186,7 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         if (requestCode == REQUEST_GALLERY_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 val uri: Uri = data!!.data!!
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    onImageSelected(uri)
-                }
+                onImageSelected(uri)
             } else {
                 if (intent.hasExtra(AlmatoScannerHandler.FROM_GALLERY) && intent.getBooleanExtra(
                         AlmatoScannerHandler.FROM_GALLERY,
@@ -264,11 +208,10 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         return super.onOptionsItemSelected(item)
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
-    fun onImageSelected(imageUri: Uri) {
+    private fun onImageSelected(imageUri: Uri) {
         Log.i(TAG, "uri => $imageUri")
         val iStream: InputStream = contentResolver.openInputStream(imageUri)!!
-        val exif = ExifInterface(iStream);
+        val exif = ExifInterface(iStream)
         var rotation = -1
         val orientation: Int = exif.getAttributeInt(
             ExifInterface.TAG_ORIENTATION,
@@ -279,7 +222,7 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
             ExifInterface.ORIENTATION_ROTATE_180 -> rotation = Core.ROTATE_180
             ExifInterface.ORIENTATION_ROTATE_270 -> rotation = Core.ROTATE_90_COUNTERCLOCKWISE
         }
-        Log.i(TAG, "rotation:" + rotation)
+        Log.i(TAG, "rotation:$rotation")
 
         var imageWidth = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0).toDouble()
         var imageHeight = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0).toDouble()
@@ -287,8 +230,8 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
             imageWidth = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0).toDouble()
             imageHeight = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0).toDouble()
         }
-        Log.i(TAG, "width:" + imageWidth)
-        Log.i(TAG, "height:" + imageHeight)
+        Log.i(TAG, "width:$imageWidth")
+        Log.i(TAG, "height:$imageHeight")
         val inputData: ByteArray? = readBytesFromUri(contentResolver, imageUri)
 
         val mat = Mat(Size(imageWidth, imageHeight), CvType.CV_8U)
@@ -297,7 +240,7 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         if (rotation > -1) Core.rotate(pic, pic, rotation)
         mat.release()
 
-        mPresenter.detectEdge(pic);
+        mPresenter.detectEdge(pic)
     }
 
     @Throws(IOException::class)

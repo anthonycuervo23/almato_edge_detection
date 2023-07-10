@@ -401,5 +401,4 @@ class ScanPresenter constructor(
         return null
 
     }
-
 }

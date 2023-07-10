@@ -205,9 +205,9 @@ class CropPresenter(
     }
 
     fun save(): String? {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-            Toast.makeText(context, "please grant write file permission and try again", Toast.LENGTH_SHORT).show()
-        }else{
+//        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+//            Toast.makeText(context, "please grant write file permission and try again", Toast.LENGTH_SHORT).show()
+//        }else{
             val dir: File = when {
                 Build.VERSION.SDK_INT < 29 -> {
                     Environment.getExternalStoragePublicDirectory(
@@ -266,7 +266,7 @@ class CropPresenter(
                     }
                 }
             }
-        }
+//        }
         return  null
     }
 

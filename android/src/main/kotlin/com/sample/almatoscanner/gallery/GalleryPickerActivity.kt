@@ -35,7 +35,7 @@ import java.io.InputStream
 class GalleryPickerActivity : BaseActivity() {
 
     private lateinit var mPresenter: ScanPresenter;
-    private val REQUEST_STORAGE_PERMISSION = 0
+//    private val REQUEST_STORAGE_PERMISSION = 0
     private lateinit var initialBundle: Bundle
     private val REQUEST_GALLERY_CODE = 1;
 
@@ -52,79 +52,49 @@ class GalleryPickerActivity : BaseActivity() {
             Log.i(TAG, "loading opencv error, exit")
             finish()
         }
-        if (ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ),
-                REQUEST_STORAGE_PERMISSION
-            )
-        } else if (ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                REQUEST_STORAGE_PERMISSION
-            )
-        }else{
-            pickupFromGallery();
-        }
-
-
-
+        pickupFromGallery();
 
         val initialBundle = intent.getBundleExtra(AlmatoScannerHandler.INITIAL_BUNDLE) as Bundle;
-
         this.title = initialBundle.getString(AlmatoScannerHandler.SCAN_TITLE) as? String
-
-
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int,
+//        permissions: Array<out String>,
+//        grantResults: IntArray
+//    ) {
+//
+//        var allGranted = false
+//        var indexPermission = -1
+//
+//        if (requestCode == REQUEST_STORAGE_PERMISSION) {
+//            if (grantResults.count() == 1) {
+//                if (permissions.indexOf(android.Manifest.permission.CAMERA) >= 0) {
+//                    indexPermission = permissions.indexOf(android.Manifest.permission.CAMERA)
+//                }
+//                if (permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) >= 0) {
+//                    indexPermission =
+//                        permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                }
+//                if (indexPermission >= 0 && grantResults[indexPermission] == PackageManager.PERMISSION_GRANTED) {
+//                    allGranted = true
+//
+//                }
+//            }
+//        }
 
-        var allGranted = false
-        var indexPermission = -1
+//        if (allGranted) {
+//            pickupFromGallery();
+//        }else{
+//            Toast.makeText(this, "Permissions are required to access the gallery", Toast.LENGTH_LONG).show();
+//            finish();
+//        }
+//
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//
+//    }
 
-        if (requestCode == REQUEST_STORAGE_PERMISSION) {
-            if (grantResults.count() == 1) {
-                if (permissions.indexOf(android.Manifest.permission.CAMERA) >= 0) {
-                    indexPermission = permissions.indexOf(android.Manifest.permission.CAMERA)
-                }
-                if (permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) >= 0) {
-                    indexPermission =
-                        permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                }
-                if (indexPermission >= 0 && grantResults[indexPermission] == PackageManager.PERMISSION_GRANTED) {
-                    allGranted = true
-
-                }
-            }
-        }
-
-        if (allGranted) {
-            pickupFromGallery();
-        }else{
-            Toast.makeText(this, "Permissions are required to access the gallery", Toast.LENGTH_LONG).show();
-            finish();
-        }
-
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-    }
-
-    fun pickupFromGallery() {
+    private fun pickupFromGallery() {
         val gallery = Intent(
             Intent.ACTION_PICK,
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply{
@@ -143,7 +113,7 @@ class GalleryPickerActivity : BaseActivity() {
                     finish()
                 }
             } else {
-                 finish()
+                finish()
             }
         }
         if (requestCode == 1) {
@@ -151,9 +121,7 @@ class GalleryPickerActivity : BaseActivity() {
             if (resultCode == Activity.RESULT_OK) {
                 Log.i(TAG, "request code OK")
                 val uri: Uri = data!!.data!!
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    onImageSelected(uri)
-                }
+                onImageSelected(uri)
             } else {
                 finish()
             }
@@ -161,8 +129,7 @@ class GalleryPickerActivity : BaseActivity() {
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.N)
-    fun onImageSelected(imageUri: Uri) {
+    private fun onImageSelected(imageUri: Uri) {
         Log.i(TAG, "uri => $imageUri")
         val iStream: InputStream = contentResolver.openInputStream(imageUri)!!
         val exif = ExifInterface(iStream);
