@@ -34,29 +34,29 @@ public class SwiftAlmatoScannerPlugin: NSObject, FlutterPlugin {
     }
     
     private func camera() {
-        
-        let scannerViewController: ImageScannerController = ImageScannerController()
-        scannerViewController.imageScannerDelegate = self
-        scannerViewController.modalPresentationStyle = .fullScreen
+        DispatchQueue.main.async {
+            let scannerViewController: ImageScannerController = ImageScannerController()
+            scannerViewController.imageScannerDelegate = self
+            scannerViewController.modalPresentationStyle = .fullScreen
 
-        if #available(iOS 13.0, *) {
-            scannerViewController.overrideUserInterfaceStyle = .dark
+            if #available(iOS 13.0, *) {
+                scannerViewController.overrideUserInterfaceStyle = .dark
+            }
+
+            self.rootViewController?.present(scannerViewController, animated:true, completion:nil)
         }
-
-        rootViewController?.present(scannerViewController, animated:true, completion:nil)
-
     }
     
     func gallery() {
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.sourceType = .photoLibrary
-        imagePicker.modalPresentationStyle = .fullScreen
+        DispatchQueue.main.async {
+            let imagePicker = UIImagePickerController()
+            imagePicker.delegate = self
+            imagePicker.sourceType = .photoLibrary
+            imagePicker.modalPresentationStyle = .fullScreen
 
-        rootViewController?.present(imagePicker, animated: true)
-
+            self.rootViewController?.present(imagePicker, animated: true)
+        }
     }
-}
 
 extension SwiftAlmatoScannerPlugin : ImageScannerControllerDelegate{
     
