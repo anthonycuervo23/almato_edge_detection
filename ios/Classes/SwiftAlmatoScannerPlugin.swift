@@ -37,7 +37,7 @@ public class SwiftAlmatoScannerPlugin: NSObject, FlutterPlugin {
         DispatchQueue.main.async {
             let scannerViewController: ImageScannerController = ImageScannerController()
             scannerViewController.imageScannerDelegate = self
-            scannerViewController.modalPresentationStyle = .fullScreen
+            scannerViewController.modalPresentationStyle = .popover
 
             if #available(iOS 13.0, *) {
                 scannerViewController.overrideUserInterfaceStyle = .dark
