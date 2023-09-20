@@ -37,7 +37,7 @@ public class SwiftAlmatoScannerPlugin: NSObject, FlutterPlugin {
         DispatchQueue.main.async {
             let scannerViewController: ImageScannerController = ImageScannerController()
             scannerViewController.imageScannerDelegate = self
-            scannerViewController.modalPresentationStyle = .popover
+            scannerViewController.modalPresentationStyle = .fullScreen
 
             if #available(iOS 13.0, *) {
                 scannerViewController.overrideUserInterfaceStyle = .dark
@@ -52,7 +52,7 @@ public class SwiftAlmatoScannerPlugin: NSObject, FlutterPlugin {
             let imagePicker = UIImagePickerController()
             imagePicker.delegate = self
             imagePicker.sourceType = .photoLibrary
-            imagePicker.modalPresentationStyle = .fullScreen
+            imagePicker.modalPresentationStyle = .popover
 
             self.rootViewController?.present(imagePicker, animated: true)
         }
