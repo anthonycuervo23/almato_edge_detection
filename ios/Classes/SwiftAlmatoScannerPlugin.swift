@@ -57,6 +57,7 @@ public class SwiftAlmatoScannerPlugin: NSObject, FlutterPlugin {
             self.rootViewController?.present(imagePicker, animated: true)
         }
     }
+}
 
 extension SwiftAlmatoScannerPlugin : ImageScannerControllerDelegate{
     
